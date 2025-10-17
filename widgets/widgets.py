@@ -1,5 +1,4 @@
-import sys
-from PySide6.QtWidgets import QApplication, QMenuBar, QMainWindow, QMenu, QTableWidget, QWidget, QVBoxLayout, QFileDialog
+from PySide6.QtWidgets import QMenuBar, QMainWindow, QMenu, QTableWidget, QWidget, QVBoxLayout, QFileDialog
 from PySide6.QtCore import QSize, QSettings
 from PySide6.QtGui import QKeySequence
 
@@ -79,12 +78,3 @@ class Table(QTableWidget):
         self.horizontalHeader().setFixedHeight(20)
         self.verticalHeader().setMinimumSectionSize(12)
         self.verticalHeader().setDefaultSectionSize(20)
-
-
-if __name__ == "__main__":
-    app = QApplication([])
-
-    window = MainWindow()
-    window.show()
-
-    sys.exit(app.exec())
