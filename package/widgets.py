@@ -1,5 +1,5 @@
-from PySide6.QtWidgets import QMenuBar, QMainWindow, QMenu, QTableWidget, QWidget, QVBoxLayout, QFileDialog, QTableWidgetItem, QHeaderView
-from PySide6.QtCore import QSize, QSettings
+from PySide6.QtWidgets import QMenuBar, QMainWindow, QMenu, QTableWidget, QWidget, QVBoxLayout, QFileDialog, QTableWidgetItem, QStyledItemDelegate, QPlainTextEdit
+from PySide6.QtCore import QSize, QSettings, Qt, QModelIndex, QAbstractItemModel, QRect
 from PySide6.QtGui import QKeySequence
 from package.functions import read_file
 
@@ -93,6 +93,8 @@ class Table(QTableWidget):
         self.setVerticalScrollMode(QTableWidget.ScrollMode.ScrollPerPixel)
         self.setHorizontalScrollMode(QTableWidget.ScrollMode.ScrollPerPixel)
         self.setStyleSheet("QHeaderView::section{background-color:Snow}")
+        self.setItemDelegate(PlainTextEditDelegate())
+        self.setTextElideMode(Qt.TextElideMode.ElideNone)
 
     def load_data_from_file(self, file_path: str) -> None:
         data = read_file(file_path)
@@ -105,3 +107,38 @@ class Table(QTableWidget):
             self.insertRow(row_index)
             self.setItem(row_index, 0, id)
             self.setItem(row_index, 1, text)
+
+
+class PlainTextEditDelegate(QStyledItemDelegate):
+    def createEditor(self, parent, option, index):
+        editor = QPlainTextEdit(parent)
+        editor.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        editor.keyPressEvent = self._create_key_press_handler(editor)
+
+        return editor
+
+    def setEditorData(self, editor: QPlainTextEdit, index: QModelIndex):
+        value = index.data(Qt.ItemDataRole.EditRole)
+        editor.setPlainText(str(value))
+
+    def setModelData(self, editor: QPlainTextEdit, model: QAbstractItemModel, index):
+        model.setData(index, editor.toPlainText(), Qt.ItemDataRole.EditRole)
+
+    def updateEditorGeometry(self, editor: QPlainTextEdit, option, index):
+        rect: QRect = option.rect
+        rect.setHeight(100)
+        editor.setGeometry(rect)
+
+    def _create_key_press_handler(self, editor: QPlainTextEdit):
+        original_key_press_event = editor.keyPressEvent
+
+        def custom_key_press_event(event):
+            if event.key() == Qt.Key.Key_Return or event.key() == Qt.Key.Key_Enter:
+                self.commitData.emit(editor)
+                self.closeEditor.emit(
+                    editor, QStyledItemDelegate.EndEditHint.SubmitModelCache)
+                return
+
+            original_key_press_event(event)
+
+        return custom_key_press_event
