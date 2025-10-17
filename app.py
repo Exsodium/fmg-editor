@@ -1,18 +1,21 @@
 import sys
-from PySide6.QtWidgets import QApplication, QMenuBar, QMainWindow, QMenu, QTableWidget, QWidget, QVBoxLayout
+from PySide6.QtWidgets import QApplication, QMenuBar, QMainWindow, QMenu, QTableWidget, QWidget, QVBoxLayout, QFileDialog
 from PySide6.QtCore import QSize, QSettings
 from PySide6.QtGui import QKeySequence
 
 
 class MainWindow(QMainWindow):
+    window_title = 'FmgEditor'
+    owner = 'Exsodium'
+
     def __init__(self) -> QMainWindow:
         super().__init__(
             size=QSize(600, 800),
             minimumSize=QSize(400, 400),
-            windowTitle='FmgEditor'
+            windowTitle=self.window_title
         )
 
-        self.settings = QSettings('Exsodium', 'FmgEditor')
+        self.settings = QSettings(self.owner, self.window_title)
         geometry = self.settings.value('geometry')
 
         if geometry:
@@ -37,12 +40,27 @@ class Menu(QMenu):
             'Сохранить', self._on_save_file, shortcut=QKeySequence.StandardKey.Save)
 
     def _on_open_file(self) -> None:
+        parent: MainWindow = self.parent()
+
+        file_path, _ = QFileDialog.getOpenFileUrl(
+            caption='Открыть файл',
+            filter='Fmg (*.fmg)',
+            dir=parent.settings.value('last_directory')
+        )
+
+        if file_path.isEmpty():
+            return
+
+        window_name = parent.window_title
+        file_name = file_path.fileName()
+        parent.setWindowTitle(f'{file_name} - {window_name}')
+        parent.settings.setValue('last_directory', file_path.url())
+
         central_widget = QWidget()
         layout = QVBoxLayout(central_widget)
         table = Table()
         layout.addWidget(table)
 
-        parent: MainWindow = self.parent()
         parent.setCentralWidget(central_widget)
 
     def _on_save_file(self) -> None:
