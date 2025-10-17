@@ -1,6 +1,6 @@
 from sys import exit
 from PySide6.QtWidgets import QApplication
-from widgets.widgets import MainWindow
+from package.widgets import MainWindow
 
 
 def main() -> None:
