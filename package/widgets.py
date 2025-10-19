@@ -1,5 +1,9 @@
-from PySide6.QtWidgets import QMenuBar, QMainWindow, QMenu, QTableWidget, QWidget, QVBoxLayout, QFileDialog, QTableWidgetItem, QStyledItemDelegate, QPlainTextEdit
-from PySide6.QtCore import QSize, QSettings, Qt, QModelIndex, QAbstractItemModel, QRect
+from PySide6.QtWidgets import (QMenuBar, QMainWindow, QMenu, QTableWidget,
+                               QWidget, QVBoxLayout, QFileDialog,
+                               QTableWidgetItem, QStyledItemDelegate,
+                               QPlainTextEdit)
+from PySide6.QtCore import (QSize, QSettings, Qt, QModelIndex,
+                            QAbstractItemModel, QRect)
 from PySide6.QtGui import QKeySequence
 from package.functions import read_file
 
@@ -37,34 +41,37 @@ class MainWindow(QMainWindow):
 class Menu(QMenu):
     def __init__(self, parent: MainWindow) -> QMenu:
         super().__init__('&Файл', parent=parent)
+        self.main_window = parent
         self.addAction(
             'Открыть файл...', self._on_open_file, shortcut=QKeySequence.StandardKey.Open)
         self.addAction(
             'Сохранить', self._on_save_file, shortcut=QKeySequence.StandardKey.Save)
+        self.addSeparator()
+        self.addAction('Выход', self._on_exit)
 
     def _on_open_file(self) -> None:
-        parent: MainWindow = self.parent()
+        last_directory = self.main_window.settings.value('last_directory')
 
         file_path, _ = QFileDialog.getOpenFileUrl(
             caption='Открыть файл',
             filter='Fmg (*.fmg)',
-            dir=parent.settings.value('last_directory')
+            dir=last_directory
         )
 
-        if file_path.isEmpty():
+        if not file_path:
             return
 
         file_name = file_path.fileName()
-        parent.add_file_name_to_window_title(file_name)
+        self.main_window.add_file_name_to_window_title(file_name)
 
         file_url = file_path.url()
-        parent.settings.setValue('last_directory', file_url)
+        self.main_window.settings.setValue('last_directory', file_url)
 
         central_widget = QWidget()
         layout = QVBoxLayout(central_widget)
         table = Table()
         layout.addWidget(table)
-        parent.setCentralWidget(central_widget)
+        self.main_window.setCentralWidget(central_widget)
 
         file_path = file_path.path()[1:]
         table.load_data_from_file(file_path)
@@ -73,6 +80,9 @@ class Menu(QMenu):
 
     def _on_save_file(self) -> None:
         print(QKeySequence.StandardKey.Save)
+
+    def _on_exit(self) -> None:
+        self.main_window.close()
 
 
 class Table(QTableWidget):

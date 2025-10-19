@@ -10,12 +10,12 @@ def read_file(file_path: str) -> dict[str, str]:
 
         num_entries = read_int(file, int_type=32, offset=0xC)
         start_offset = read_int(file, int_type=32, offset=0x14)
-        row_number = 0
 
         for i in range(num_entries):
-            start_index = read_int(file, int_type=32, offset=0x1C + i * 0xC)
-            start_id = read_int(file, int_type=32, offset=0x1C + i * 0xC + 4)
-            end_id = read_int(file, int_type=32, offset=0x1C + i * 0xC + 8)
+            entry_offset = 0x1C + i * 0xC
+            start_index = read_int(file, int_type=32, offset=entry_offset)
+            start_id = read_int(file, int_type=32, offset=entry_offset + 4)
+            end_id = read_int(file, int_type=32, offset=entry_offset + 8)
 
             for id in range(start_id, end_id + 1):
                 text_offset = read_int(
@@ -28,8 +28,6 @@ def read_file(file_path: str) -> dict[str, str]:
                 if text_offset > 0:
                     text = read_unicode_string(file, text_offset)
                     text = text.replace('\n', '/n/')
-
-                row_number += 1
 
                 data[str(id)] = text
 
@@ -48,14 +46,13 @@ def read_int(file: BufferedReader, int_type: int, offset: int) -> int:
             format_char = 'i'
 
     data = file.read(size)
-    return struct.unpack('<' + format_char, data)[0]
+    return struct.unpack(f'<{format_char}', data)[0]
 
 
 def read_unicode_string(file: BufferedReader, offset: int) -> str:
     file.seek(offset)
 
-    max_bytes = 4096
-    data = file.read(max_bytes)
+    data = file.read(1024)
 
     for i in range(0, len(data) - 1, 2):
         if data[i] == 0 and data[i + 1] == 0:
