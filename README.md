@@ -1,9 +1,9 @@
 # FmgEditor
 
 ## Описание
-FmgEditor - приложение для просмотра и редактирования FMG файлов. Приложение предоставляет удобный табличный интерфейс для работы с текстовыми данными, поддерживает многострочное редактирование и автоматическое определение кодировок.
+FmgEditor - An application for viewing and editing FMG files. It provides a convenient spreadsheet interface for working with text data and supports multi-line editing.
 
 ## Возможности
-- Открытие FMG файлов - поддержка бинарных FMG форматов
-- Табличное представление - удобный просмотр данных в виде таблицы
-- Многострочное редактирование - редактор с поддержкой переноса строк
+- Opening FMG files - support for binary FMG formats
+- Table view - convenient data viewing in a table
+- Multi-line editing - editor with line break support
