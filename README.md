@@ -12,4 +12,4 @@ FmgEditor - An application for viewing and editing FMG files. It provides a conv
 This proeject uses a [MIT License](https://github.com/Exsodium/fmg-editor/blob/main/LICENSE).
 
 ## Contacts
-Contact me in the [Telegram app]((https://t.me/Exsodium))
+Contact me in the [Telegram app](https://t.me/Exsodium)
