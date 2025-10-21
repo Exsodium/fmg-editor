@@ -26,8 +26,10 @@ class MainWindow(QMainWindow):
             self.restoreGeometry(geometry)
 
         menu_bar = QMenuBar()
-        file_menu = Menu(self)
+        file_menu = FileMenu(self)
+        language_menu = LanguageMenu()
         menu_bar.addMenu(file_menu)
+        menu_bar.addMenu(language_menu)
         self.setMenuBar(menu_bar)
 
     def closeEvent(self, event) -> None:
@@ -41,7 +43,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(f'• {self.windowTitle()}')
 
 
-class Menu(QMenu):
+class FileMenu(QMenu):
     def __init__(self, parent: MainWindow) -> QMenu:
         super().__init__('&Файл', parent=parent)
         self.main_window = parent
@@ -158,7 +160,7 @@ class PlainTextEditDelegate(QStyledItemDelegate):
 
         model.setData(index, new_value, Qt.ItemDataRole.EditRole)
         main_window: MainWindow = self.parent().parent().parent()
-        menu: Menu = main_window.menuWidget().actions()[0].menu()
+        menu: FileMenu = main_window.menuWidget().actions()[0].menu()
 
         if old_value != new_value:
             if not ('•' in main_window.windowTitle()):
@@ -185,3 +187,10 @@ class PlainTextEditDelegate(QStyledItemDelegate):
             original_key_press_event(event)
 
         return custom_key_press_event
+
+
+class LanguageMenu(QMenu):
+    def __init__(self) -> QMenu:
+        super().__init__('&Язык')
+        self.addAction('Английский')
+        self.addAction('Русский')
