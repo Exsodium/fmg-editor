@@ -1,10 +1,12 @@
 from sys import exit
 from PySide6.QtWidgets import QApplication
+from PySide6.QtGui import QIcon
 from package.widgets import MainWindow
 
 
 def main() -> None:
     app = QApplication([])
+    app.setWindowIcon(QIcon('icon.png'))
 
     window = MainWindow()
     window.show()
