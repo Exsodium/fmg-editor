@@ -6,7 +6,7 @@ from package.widgets import MainWindow
 
 def main() -> None:
     app = QApplication([])
-    app.setWindowIcon(QIcon('icon.png'))
+    app.setWindowIcon(QIcon('icon.ico'))
 
     window = MainWindow()
     window.show()
