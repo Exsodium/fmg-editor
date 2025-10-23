@@ -289,7 +289,8 @@ class Table(QTableWidget):
 class PlainTextEditDelegate(QStyledItemDelegate):
     def createEditor(self, parent, option, index) -> QPlainTextEdit:
         editor = QPlainTextEdit(parent)
-        editor.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        editor.setVerticalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         editor.keyPressEvent = self._create_key_press_handler(editor)
 
         return editor
