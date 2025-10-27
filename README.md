@@ -13,3 +13,6 @@ This project uses a [MIT License](https://github.com/Exsodium/fmg-editor/blob/ma
 
 ## Contacts
 Contact me in the [Telegram app](https://t.me/Exsodium).
+
+## Credits
+[Wulf2k](https://github.com/Wulf2k) for the source code for writing/reading fmg files from [DaS-FmgEdit](https://github.com/Wulf2k/DaS-FmgEdit).
