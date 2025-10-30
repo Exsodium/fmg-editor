@@ -3,64 +3,56 @@ import struct
 from os import fstat
 
 
-def read_file(file_path: str) -> dict[str, str]:
-    data = {}
+def read_file(file_path: str) -> tuple[tuple[int, str]]:
+    data = tuple()
 
     with open(file_path, 'rb') as file:
-        read_int(file, int_type=8, offset=9)
-
-        num_entries = read_int(file, int_type=32, offset=0xC)
-        start_offset = read_int(file, int_type=32, offset=0x14)
+        num_entries = read_int(file, 12)
+        start_offset = read_int(file, 20)
 
         for i in range(num_entries):
-            entry_offset = 0x1C + i * 0xC
-            start_index = read_int(file, int_type=32, offset=entry_offset)
-            start_id = read_int(file, int_type=32, offset=entry_offset + 4)
-            end_id = read_int(file, int_type=32, offset=entry_offset + 8)
+            entry_offset = 28 + i * 12
+            start_index = read_int(file, entry_offset)
+            start_id = read_int(file, entry_offset + 4)
+            end_id = read_int(file, entry_offset + 8)
 
             for id in range(start_id, end_id + 1):
                 text_offset = read_int(
                     file,
-                    int_type=32,
-                    offset=start_offset + (start_index + id - start_id) * 4
+                    start_offset + (start_index + id - start_id) * 4
                 )
                 text = str()
 
                 if text_offset > 0:
-                    text = read_unicode_string(file, text_offset)
-                    text = text.replace('\n', '/n/')
+                    text = read_str(file, text_offset)
 
-                data[str(id)] = text
+                data += (id, text),
 
     return data
 
 
-def read_int(file: BufferedReader, int_type: int, offset: int) -> int:
+def read_int(file: BufferedReader, offset: int) -> int:
     file.seek(offset)
+    byte_int = file.read(4)
 
-    match int_type:
-        case 8:
-            size = 1
-            format_char = 'b'
-        case 32:
-            size = 4
-            format_char = 'i'
-
-    data = file.read(size)
-    return struct.unpack(f'<{format_char}', data)[0]
+    return int.from_bytes(byte_int, byteorder='little')
 
 
-def read_unicode_string(file: BufferedReader, offset: int) -> str:
+def read_str(file: BufferedReader, offset: int) -> str:
+    text = str()
     file.seek(offset)
+    fragment = str()
 
-    data = file.read(1024)
+    while chr(0) not in fragment:
+        text += fragment
+        byte_string = file.read(200)
+        fragment = byte_string.decode('utf-16-le')
 
-    for i in range(0, len(data) - 1, 2):
-        if data[i] == 0 and data[i + 1] == 0:
-            data = data[:i]
-            break
+    end = fragment.find(chr(0))
+    text += fragment[:end]
+    text = text.replace('\n', '/n/')
 
-    return data.decode('utf-16-le') if data else ''
+    return text
 
 
 def write_data_to_file(data: dict[str, str], file_path: str) -> None:

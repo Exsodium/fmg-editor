@@ -264,9 +264,9 @@ class Table(QTableWidget):
     def load_data_from_file(self, file_path: str) -> None:
         data = read_file(file_path)
 
-        for key, value in data.items():
-            id = QTableWidgetItem(key)
-            text = QTableWidgetItem(value)
+        for item in data:
+            id = QTableWidgetItem(str(item[0]))
+            text = QTableWidgetItem(item[1])
 
             row_index = self.rowCount()
             self.insertRow(row_index)
