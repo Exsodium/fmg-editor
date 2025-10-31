@@ -1,5 +1,4 @@
 from io import BufferedReader, BufferedWriter
-import struct
 from os import fstat
 
 
