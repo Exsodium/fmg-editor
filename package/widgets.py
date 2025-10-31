@@ -199,13 +199,13 @@ class FileMenu(QMenu):
         self.save_action.setEnabled(False)
 
     def _on_save_file(self) -> None:
-        data = {}
+        data = tuple()
 
         for i in range(self.table.rowCount()):
             id = self.table.item(i, 0).text()
             text = self.table.item(i, 1).text()
 
-            data[id] = text
+            data += (int(id), text),
 
         write_data_to_file(data, self.file_path)
 

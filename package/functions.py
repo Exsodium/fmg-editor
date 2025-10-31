@@ -4,7 +4,7 @@ from os import fstat
 
 
 def read_file(file_path: str) -> tuple[tuple[int, str]]:
-    data = tuple()
+    data: tuple[tuple[int, str]] = tuple()
 
     with open(file_path, 'rb') as file:
         num_entries = read_int(file, 12)
@@ -55,35 +55,29 @@ def read_str(file: BufferedReader, offset: int) -> str:
     return text
 
 
-def write_data_to_file(data: dict[str, str], file_path: str) -> None:
+def write_data_to_file(data: tuple[tuple[int, str]], file_path: str) -> None:
     with open(file_path, 'wb') as file:
-        entries_amount = 0
+        entries_amount = chunks_amount = 0
         previous_id = -2
-        chunks_amount = 0
 
-        for id in data.keys():
-            current_id = int(id)
-
-            if current_id > previous_id + 1:
+        for item in data:
+            if item[0] > previous_id + 1:
                 chunks_amount += 1
 
             entries_amount += 1
-            previous_id = current_id
+            previous_id = item[0]
 
-        start_offset = 0x1c + 0xC * chunks_amount
+        start_offset = 28 + chunks_amount * 12
         text_offset = start_offset + entries_amount * 4
 
-        first_id = int(list(data.keys())[0])
-        last_id = first_id
-        start_entry = 0
-        entries_amount = 0
-        chunks_amount = 0
+        first_id = last_id = data[0][0]
+        start_entry = entries_amount = chunks_amount = 0
 
-        for id, text in data.items():
-            current_id = int(id)
+        for item in data:
+            current_id = item[0]
 
             if current_id > last_id + 1:
-                entry_offset = 0x1C + chunks_amount * 0xC
+                entry_offset = 28 + chunks_amount * 12
                 write_int(file=file, int_type=32,
                           offset=entry_offset, value=start_entry)
                 write_int(file=file, int_type=32,
@@ -95,9 +89,7 @@ def write_data_to_file(data: dict[str, str], file_path: str) -> None:
                 start_entry = entries_amount
                 chunks_amount += 1
 
-            string = text.replace('\r\n', '')
-
-            if string:
+            if text := item[1]:
                 write_int(
                     file=file,
                     int_type=32,
@@ -105,21 +97,22 @@ def write_data_to_file(data: dict[str, str], file_path: str) -> None:
                     value=text_offset
                 )
 
-                string = string.replace('/n/', '\n')
+                text = text.replace('/n/', '\n')
 
-                if not string.endswith('\0'):
-                    string += '\0'
+                if not text.endswith('\0'):
+                    text += '\0'
 
-                write_unicode_string(file, text_offset, string)
-                text_offset += len(string) * 2
+                write_string(file, text_offset, text)
+                text_offset += len(text) * 2
 
             entries_amount += 1
             last_id = current_id
 
-        st_size = fstat(file.fileno()).st_size
-        if st_size % 4 == 2:
+        file_size = fstat(file.fileno()).st_size
+        if file_size % 4 == 2:
             write_int(file=file, int_type=16, offset=text_offset, value=0)
 
+        entry_offset = 28 + chunks_amount * 12
         write_int(file=file, int_type=32,
                   offset=entry_offset, value=start_entry)
         write_int(file=file, int_type=32,
@@ -127,13 +120,13 @@ def write_data_to_file(data: dict[str, str], file_path: str) -> None:
         write_int(file=file, int_type=32,
                   offset=entry_offset + 8, value=last_id)
 
-        write_int(file=file, int_type=32, offset=0, value=0x10000)
-        write_int(file=file, int_type=8, offset=0x8, value=1)
+        write_int(file=file, int_type=32, offset=0, value=65536)
+        write_int(file=file, int_type=8, offset=8, value=1)
 
-        write_int(file=file, int_type=32, offset=0x4, value=st_size)
-        write_int(file=file, int_type=32, offset=0xC, value=chunks_amount + 1)
-        write_int(file=file, int_type=32, offset=0x10, value=entries_amount)
-        write_int(file=file, int_type=32, offset=0x14, value=start_offset)
+        write_int(file=file, int_type=32, offset=4, value=file_size)
+        write_int(file=file, int_type=32, offset=12, value=chunks_amount + 1)
+        write_int(file=file, int_type=32, offset=16, value=entries_amount)
+        write_int(file=file, int_type=32, offset=20, value=start_offset)
 
 
 def write_int(file: BufferedWriter, int_type: int, offset: int, value: int) -> None:
@@ -141,16 +134,17 @@ def write_int(file: BufferedWriter, int_type: int, offset: int, value: int) -> N
 
     match int_type:
         case 8:
-            format = 'b'
+            length = 1
         case 16:
-            format = '<h'
+            length = 2
         case 32:
-            format = '<i'
+            length = 4
 
-    file.write(struct.pack(format, value))
+    number = value.to_bytes(length, byteorder='little')
+    file.write(number)
 
 
-def write_unicode_string(file: BufferedWriter, offset: int, string: str) -> None:
+def write_string(file: BufferedWriter, offset: int, string: str) -> None:
     file.seek(offset)
     encoded_string = string.encode('utf-16-le')
     file.write(encoded_string)
