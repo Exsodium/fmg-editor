@@ -14,7 +14,7 @@ class MainWindow(QMainWindow):
     window_title = 'FmgEditor'
     owner = 'Exsodium'
 
-    def __init__(self) -> QMainWindow:
+    def __init__(self) -> None:
         super().__init__(
             size=QSize(600, 800),
             minimumSize=QSize(400, 400),
@@ -106,7 +106,7 @@ class MainWindow(QMainWindow):
 
 
 class LanguageMenu(QMenu):
-    def __init__(self, parent: MainWindow) -> QMenu:
+    def __init__(self, parent: MainWindow) -> None:
         super().__init__(parent)
         self.main_window = parent
         language_group = QActionGroup(self)
@@ -153,7 +153,7 @@ class LanguageMenu(QMenu):
 
 
 class FileMenu(QMenu):
-    def __init__(self, parent: MainWindow) -> QMenu:
+    def __init__(self, parent: MainWindow) -> None:
         super().__init__(parent)
         self.main_window = parent
         self.addAction(str(), self._on_open_file,
@@ -239,7 +239,7 @@ class FileMenu(QMenu):
 
 
 class Table(QTableWidget):
-    def __init__(self, parent: MainWindow) -> QTableWidget:
+    def __init__(self, parent: MainWindow) -> None:
         super().__init__(parent)
         self.main_window = parent
         self.setColumnCount(2)
