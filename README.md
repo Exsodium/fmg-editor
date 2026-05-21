@@ -1,7 +1,7 @@
 # FmgEditor
 
 ## Description
-FmgEditor - An application for viewing and editing FMG files. It provides a convenient spreadsheet interface for working with text data and supports multi-line editing.
+FmgEditor - an application for viewing and editing FMG files. It provides a convenient spreadsheet interface for working with text data and supports multi-line editing.
 
 ## Abilities
 - Opening, editing, saving FMG files - support for binary FMG formats;
